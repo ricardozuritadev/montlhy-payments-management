@@ -9,6 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Debt } from '@/app/types/debt'
+import { TogglePaidButton } from './toggle-paid-button'
 
 type DebtsTableProps = {
     debts: Debt[]
@@ -107,7 +108,13 @@ export function DebtsTable({ debts }: DebtsTableProps) {
                                     <Button variant="outline" size="sm">
                                         Editar
                                     </Button>
-                                    <Button size="sm">Marcar pagado</Button>
+
+                                    <div className="w-[140px]">
+                                        <TogglePaidButton
+                                            debtId={debt.id}
+                                            isPaidThisMonth={debt.isPaidThisMonth}
+                                        />
+                                    </div>
                                 </div>
                             </TableCell>
                         </TableRow>

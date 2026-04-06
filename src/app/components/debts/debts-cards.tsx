@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Debt } from '@/app/types/debt'
+import { TogglePaidButton } from './toggle-paid-button'
 
 type DebtsCardsProps = {
     debts: Debt[]
@@ -58,7 +59,13 @@ export function DebtsCards({ debts }: DebtsCardsProps) {
                         <Button variant="outline" className="w-full">
                             Editar
                         </Button>
-                        <Button className="w-full">Marcar pagado</Button>
+
+                        <div className="w-full">
+                            <TogglePaidButton
+                                debtId={debt.id}
+                                isPaidThisMonth={debt.isPaidThisMonth}
+                            />
+                        </div>
                     </div>
                 </article>
             ))}

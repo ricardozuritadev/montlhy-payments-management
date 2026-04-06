@@ -47,7 +47,10 @@ export function DebtsDashboard({ debts }: DebtsDashboardProps) {
                     </div>
                 </div>
 
-                <div className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6">
+                <div
+                    id="new-debt-form"
+                    className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
+                >
                     <div className="mx-auto w-full max-w-2xl">
                         <DebtForm />
                     </div>
