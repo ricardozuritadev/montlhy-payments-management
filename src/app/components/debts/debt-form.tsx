@@ -23,6 +23,13 @@ import {
 import { useState } from 'react'
 import { createDebtAction } from '@/app/actions/create-debt-action'
 
+/** Valores de inputs numéricos en RHF pueden ser unknown hasta validar. */
+function parseNumericInput(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null
+    const n = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(n) ? n : null
+}
+
 export function DebtForm() {
     const {
         register,
@@ -43,7 +50,6 @@ export function DebtForm() {
             paymentDate: '',
             endDate: '',
             totalAmount: null,
-            outstandingAmount: null,
             isPaidThisMonth: false,
         },
     })
@@ -53,6 +59,23 @@ export function DebtForm() {
 
     const isPaidThisMonth = watch('isPaidThisMonth')
     const selectedCurrency = watch('currency')
+    const totalDues = watch('totalDues')
+    const duesPaid = watch('duesPaid')
+    const totalAmount = watch('totalAmount')
+    const monthlyPayment = watch('monthlyPayment')
+
+    const totalDuesNum = parseNumericInput(totalDues)
+    const duesPaidNum = parseNumericInput(duesPaid) ?? 0
+    const totalAmountNum = parseNumericInput(totalAmount)
+    const monthlyPaymentNum = parseNumericInput(monthlyPayment) ?? 0
+
+    const calculatedOutstandingDues =
+        totalDuesNum !== null ? Math.max(totalDuesNum - duesPaidNum, 0) : null
+
+    const calculatedOutstandingAmount =
+        totalAmountNum !== null
+            ? Math.max(totalAmountNum - monthlyPaymentNum * duesPaidNum, 0)
+            : null
 
     const onSubmit = async (values: DebtFormValues): Promise<void> => {
         setServerError(null)
@@ -75,7 +98,6 @@ export function DebtForm() {
             paymentDate: '',
             endDate: '',
             totalAmount: null,
-            outstandingAmount: null,
             isPaidThisMonth: false,
         })
 
@@ -190,6 +212,12 @@ export function DebtForm() {
                     </div>
                 </div>
 
+                {calculatedOutstandingDues !== null ? (
+                    <p className="text-sm text-muted-foreground">
+                        Cuotas restantes: <strong>{calculatedOutstandingDues}</strong>
+                    </p>
+                ) : null}
+
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="grid gap-2">
                         <Label htmlFor="paymentDate">Fecha de cobro</Label>
@@ -220,7 +248,7 @@ export function DebtForm() {
                     </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="totalAmount">Valor total</Label>
                         <Input
@@ -237,21 +265,19 @@ export function DebtForm() {
                         ) : null}
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="outstandingAmount">Valor restante</Label>
-                        <Input
-                            id="outstandingAmount"
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            {...register('outstandingAmount')}
-                        />
-                        {errors.outstandingAmount ? (
-                            <p className="text-sm text-destructive">
-                                {errors.outstandingAmount.message}
+                    {calculatedOutstandingAmount !== null ? (
+                        <div className="rounded-xl border bg-muted/40 p-4">
+                            <p className="text-sm font-medium">
+                                Valor restante calculado
                             </p>
-                        ) : null}
-                    </div>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                {new Intl.NumberFormat('es-ES', {
+                                    style: 'currency',
+                                    currency: selectedCurrency,
+                                }).format(calculatedOutstandingAmount)}
+                            </p>
+                        </div>
+                    ) : null}
                 </div>
 
                 <div className="flex items-center justify-between rounded-xl border p-4">

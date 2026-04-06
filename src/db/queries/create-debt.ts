@@ -2,6 +2,11 @@ import { db } from '@/db/client'
 import type { DebtFormValues } from '@/schemas/debt.schema'
 
 export async function createDebt(values: DebtFormValues): Promise<void> {
+    const outstandingAmount =
+        values.totalAmount !== null
+            ? Math.max(values.totalAmount - values.monthlyPayment * values.duesPaid, 0)
+            : null
+
     await db.execute({
         sql: `
       INSERT INTO debts (
@@ -28,7 +33,7 @@ export async function createDebt(values: DebtFormValues): Promise<void> {
             values.paymentDate,
             values.endDate,
             values.totalAmount,
-            values.outstandingAmount,
+            outstandingAmount,
             values.bank,
             values.isPaidThisMonth ? 1 : 0,
         ],

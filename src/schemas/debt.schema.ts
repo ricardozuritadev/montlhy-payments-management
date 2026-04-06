@@ -47,19 +47,22 @@ export const debtSchema = z
             .transform((value) => (Number.isNaN(value) ? null : value))
             .nullable(),
 
-        outstandingAmount: z
-            .union([z.coerce.number().min(0, 'No puede ser negativo'), z.nan()])
-            .transform((value) => (Number.isNaN(value) ? null : value))
-            .nullable(),
-
         isPaidThisMonth: z.boolean(),
     })
     .superRefine((data, ctx) => {
         if (data.totalDues !== null && data.duesPaid > data.totalDues) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 path: ['duesPaid'],
                 message: 'Las cuotas pagadas no pueden ser mayores al total de cuotas',
+            })
+        }
+
+        if (data.totalAmount !== null) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['outstandingAmount'],
+                message: 'El valor restante no puede ser mayor al total',
             })
         }
     })
