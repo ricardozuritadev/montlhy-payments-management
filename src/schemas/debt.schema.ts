@@ -1,30 +1,71 @@
 import { z } from 'zod'
 
-export const debtSchema = z.object({
-    name: z.string().min(1),
+export const debtSchema = z
+    .object({
+        name: z
+            .string()
+            .min(1, 'El nombre es obligatorio')
+            .max(120, 'El nombre es demasiado largo'),
 
-    currency: z.enum(['EUR', 'USD']),
+        bank: z
+            .string()
+            .min(1, 'El banco es obligatorio')
+            .max(80, 'El banco es demasiado largo'),
 
-    monthly_payment: z.number().positive(),
+        currency: z.enum(['EUR', 'USD'], {
+            message: 'Selecciona una moneda válida',
+        }),
 
-    total_dues: z.number().int().positive().nullable(),
+        monthlyPayment: z.coerce.number().positive('La cuota mensual debe ser mayor a 0'),
 
-    dues_paid: z.number().int().min(0),
+        totalDues: z
+            .union([z.coerce.number().int().positive('Debe ser mayor a 0'), z.nan()])
+            .transform((value) => (Number.isNaN(value) ? null : value))
+            .nullable(),
 
-    payment_date: z.string().min(3),
+        duesPaid: z.coerce
+            .number()
+            .int('Debe ser un número entero')
+            .min(0, 'No puede ser negativo'),
 
-    end_date: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .nullable(),
+        paymentDate: z
+            .string()
+            .min(1, 'La fecha de cobro es obligatoria')
+            .max(60, 'La fecha de cobro es demasiado larga'),
 
-    total_amount: z.number().positive().nullable(),
+        endDate: z
+            .string()
+            .trim()
+            .transform((value) => (value === '' ? null : value))
+            .refine(
+                (value) => value === null || /^\d{4}-\d{2}-\d{2}$/.test(value),
+                'La fecha debe tener formato YYYY-MM-DD',
+            ),
 
-    outstanding_amount: z.number().positive().nullable(),
+        totalAmount: z
+            .union([z.coerce.number().positive('Debe ser mayor a 0'), z.nan()])
+            .transform((value) => (Number.isNaN(value) ? null : value))
+            .nullable(),
 
-    bank: z.string().min(1),
+        outstandingAmount: z
+            .union([z.coerce.number().min(0, 'No puede ser negativo'), z.nan()])
+            .transform((value) => (Number.isNaN(value) ? null : value))
+            .nullable(),
 
-    is_paid_this_month: z.union([z.literal(0), z.literal(1)]),
-})
+        isPaidThisMonth: z.boolean(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.totalDues !== null && data.duesPaid > data.totalDues) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['duesPaid'],
+                message: 'Las cuotas pagadas no pueden ser mayores al total de cuotas',
+            })
+        }
+    })
 
-export type DebtInput = z.infer<typeof debtSchema>
+/** Valores que viven en el formulario (antes de transforms / coerce). */
+export type DebtFormInput = z.input<typeof debtSchema>
+
+/** Resultado tras validar (tipos finales para enviar al servidor). */
+export type DebtFormValues = z.output<typeof debtSchema>

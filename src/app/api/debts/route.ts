@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 
-import { getAllDebts } from '@/db/queries/debt.queries'
+import { createDebt } from '@/db/queries/create-debt'
 
-export async function GET() {
-    const debts = await getAllDebts()
+export async function POST(request: Request) {
+    const body = await request.json()
 
-    return NextResponse.json(debts)
+    const debt = await createDebt(body)
+
+    return NextResponse.json(debt)
 }
