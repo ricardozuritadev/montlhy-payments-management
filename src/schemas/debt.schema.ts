@@ -59,11 +59,15 @@ export const debtSchema = z
         }
 
         if (data.totalAmount !== null) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['outstandingAmount'],
-                message: 'El valor restante no puede ser mayor al total',
-            })
+            const paidTowardTotal = data.monthlyPayment * data.duesPaid
+            if (paidTowardTotal > data.totalAmount) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['duesPaid'],
+                    message:
+                        'Cuota mensual × cuotas pagadas no puede superar el valor total',
+                })
+            }
         }
     })
 
