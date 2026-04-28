@@ -305,7 +305,11 @@ export function DebtForm() {
                     <p className="text-sm text-green-600">{serverSuccess}</p>
                 ) : null}
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button
+                    type="submit"
+                    className="w-full p-6 cursor-pointer"
+                    disabled={isSubmitting}
+                >
                     {isSubmitting ? 'Guardando...' : 'Guardar deuda'}
                 </Button>
             </form>

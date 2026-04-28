@@ -35,7 +35,7 @@ export async function getDebts(): Promise<Debt[]> {
       bank,
       is_paid_this_month
     FROM debts
-    ORDER BY created_at DESC
+    ORDER BY is_paid_this_month ASC, created_at DESC
   `)
 
     return result.rows.map((row) => mapDebtRowToDebt(row as unknown as DebtRow))

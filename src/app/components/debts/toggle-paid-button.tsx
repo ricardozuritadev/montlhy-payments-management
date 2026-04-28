@@ -3,13 +3,19 @@
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { toggleDebtPaidThisMonthAction } from '@/app/actions/toggle-debt-paid-this-month-action'
+import { cn } from '@/lib/utils'
 
 type TogglePaidButtonProps = {
     debtId: string
     isPaidThisMonth: boolean
+    className?: string
 }
 
-export function TogglePaidButton({ debtId, isPaidThisMonth }: TogglePaidButtonProps) {
+export function TogglePaidButton({
+    debtId,
+    isPaidThisMonth,
+    className,
+}: TogglePaidButtonProps) {
     const [error, setError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
 
@@ -32,7 +38,7 @@ export function TogglePaidButton({ debtId, isPaidThisMonth }: TogglePaidButtonPr
                 size="sm"
                 onClick={handleClick}
                 disabled={isPending}
-                className="w-full"
+                className={cn('w-full cursor-pointer', className)}
             >
                 {isPending
                     ? 'Actualizando...'

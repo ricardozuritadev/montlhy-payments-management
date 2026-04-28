@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils'
+
 type StatsCardsProps = {
     totalMonthly: number
     totalDebts: number
@@ -29,12 +31,14 @@ export function StatsCards({
                 title="Pagadas este mes"
                 value={String(paidThisMonth)}
                 helper="Marcadas como completadas"
+                valueColor="text-green-700"
             />
 
             <StatCard
                 title="Cuotas pendientes"
                 value={String(totalOutstandingDues)}
                 helper="Suma de cuotas por pagar"
+                valueColor="text-red-700"
             />
         </section>
     )
@@ -44,13 +48,19 @@ type StatCardProps = {
     title: string
     value: string
     helper: string
+    valueColor?: string
 }
 
-function StatCard({ title, value, helper }: StatCardProps) {
+function StatCard({ title, value, helper, valueColor }: StatCardProps) {
     return (
         <div className="rounded-2xl border bg-card p-4 shadow-sm sm:p-5">
             <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+            <p
+                className={cn(
+                    'mt-2 text-2xl font-semibold tracking-tight sm:text-3xl',
+                    valueColor,
+                )}
+            >
                 {value}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">{helper}</p>

@@ -60,14 +60,22 @@ export function DashboardHeader() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Button type="button" onClick={handleScrollToForm}>
+                <Button
+                    type="button"
+                    onClick={handleScrollToForm}
+                    className="p-6 cursor-pointer"
+                >
                     <Plus className="mr-2 h-4 w-4" />
                     Nueva deuda
                 </Button>
 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button variant="outline" type="button">
+                        <Button
+                            variant="outline"
+                            type="button"
+                            className="p-6 cursor-pointer"
+                        >
                             <RotateCcw className="mr-2 h-4 w-4" />
                             Reiniciar mes
                         </Button>

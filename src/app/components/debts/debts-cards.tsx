@@ -56,7 +56,7 @@ export function DebtsCards({ debts }: DebtsCardsProps) {
                     </div>
 
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full p-6">
                             Editar
                         </Button>
 
@@ -64,6 +64,7 @@ export function DebtsCards({ debts }: DebtsCardsProps) {
                             <TogglePaidButton
                                 debtId={debt.id}
                                 isPaidThisMonth={debt.isPaidThisMonth}
+                                className="w-full p-6"
                             />
                         </div>
                     </div>
