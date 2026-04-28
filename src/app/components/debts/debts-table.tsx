@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
     Table,
     TableBody,
@@ -125,8 +126,13 @@ export function DebtsTable({ debts }: DebtsTableProps) {
                                         variant="outline"
                                         size="sm"
                                         className="w-full cursor-pointer"
+                                        asChild
                                     >
-                                        Editar
+                                        <Link
+                                            href={`/?edit=${debt.id}#new-debt-form`}
+                                        >
+                                            Editar
+                                        </Link>
                                     </Button>
                                     <TogglePaidButton
                                         debtId={debt.id}

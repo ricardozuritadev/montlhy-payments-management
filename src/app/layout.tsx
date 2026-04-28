@@ -21,7 +21,7 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`${poppins.variable} ${poppins.className} h-full antialiased`}
+            className={`${poppins.variable} ${poppins.className} h-full scroll-smooth antialiased`}
         >
             <body className="min-h-full flex flex-col">{children}</body>
         </html>

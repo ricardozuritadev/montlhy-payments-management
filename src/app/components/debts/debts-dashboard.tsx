@@ -7,9 +7,10 @@ import { DashboardHeader } from './dashboard-header'
 
 type DebtsDashboardProps = {
     debts: Debt[]
+    debtToEdit: Debt | null
 }
 
-export function DebtsDashboard({ debts }: DebtsDashboardProps) {
+export function DebtsDashboard({ debts, debtToEdit }: DebtsDashboardProps) {
     const totalMonthly = debts.reduce((sum, debt) => sum + debt.monthlyPayment, 0)
     const paidThisMonth = debts.filter((debt) => debt.isPaidThisMonth).length
     const totalOutstandingDues = debts.reduce(
@@ -52,7 +53,10 @@ export function DebtsDashboard({ debts }: DebtsDashboardProps) {
                     className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6"
                 >
                     <div className="mx-auto w-full max-w-2xl">
-                        <DebtForm />
+                        <DebtForm
+                            key={debtToEdit?.id ?? 'new-debt'}
+                            debtToEdit={debtToEdit}
+                        />
                     </div>
                 </div>
             </section>

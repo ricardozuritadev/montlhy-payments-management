@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -22,6 +24,8 @@ import {
 } from '@/schemas/debt.schema'
 import { useState } from 'react'
 import { createDebtAction } from '@/app/actions/create-debt-action'
+import { updateDebtAction } from '@/app/actions/update-debt-action'
+import type { Debt } from '@/app/types/debt'
 
 /** Valores de inputs numéricos en RHF pueden ser unknown hasta validar. */
 function parseNumericInput(value: unknown): number | null {
@@ -30,7 +34,42 @@ function parseNumericInput(value: unknown): number | null {
     return Number.isFinite(n) ? n : null
 }
 
-export function DebtForm() {
+const EMPTY_FORM_DEFAULTS: DebtFormInput = {
+    name: '',
+    bank: '',
+    currency: 'EUR',
+    monthlyPayment: 0,
+    totalDues: null,
+    duesPaid: 0,
+    paymentDate: '',
+    endDate: '',
+    totalAmount: null,
+    isPaidThisMonth: false,
+}
+
+function debtToFormInput(debt: Debt): DebtFormInput {
+    return {
+        name: debt.name,
+        bank: debt.bank,
+        currency: debt.currency,
+        monthlyPayment: debt.monthlyPayment,
+        totalDues: debt.totalDues,
+        duesPaid: debt.duesPaid,
+        paymentDate: debt.paymentDate,
+        endDate: debt.endDate ?? '',
+        totalAmount: debt.totalAmount,
+        isPaidThisMonth: debt.isPaidThisMonth,
+    }
+}
+
+type DebtFormProps = {
+    debtToEdit?: Debt | null
+}
+
+export function DebtForm({ debtToEdit = null }: DebtFormProps) {
+    const router = useRouter()
+    const isEdit = debtToEdit !== null
+
     const {
         register,
         handleSubmit,
@@ -40,18 +79,9 @@ export function DebtForm() {
         formState: { errors, isSubmitting },
     } = useForm<DebtFormInput, unknown, DebtFormValues>({
         resolver: zodResolver(debtSchema),
-        defaultValues: {
-            name: '',
-            bank: '',
-            currency: 'EUR',
-            monthlyPayment: 0,
-            totalDues: null,
-            duesPaid: 0,
-            paymentDate: '',
-            endDate: '',
-            totalAmount: null,
-            isPaidThisMonth: false,
-        },
+        defaultValues: debtToEdit
+            ? debtToFormInput(debtToEdit)
+            : EMPTY_FORM_DEFAULTS,
     })
 
     const [serverError, setServerError] = useState<string | null>(null)
@@ -81,6 +111,18 @@ export function DebtForm() {
         setServerError(null)
         setServerSuccess(null)
 
+        if (debtToEdit) {
+            const result = await updateDebtAction(debtToEdit.id, values)
+
+            if (!result.success) {
+                setServerError(result.error)
+                return
+            }
+
+            router.replace('/')
+            return
+        }
+
         const result = await createDebtAction(values)
 
         if (!result.success) {
@@ -88,18 +130,7 @@ export function DebtForm() {
             return
         }
 
-        reset({
-            name: '',
-            bank: '',
-            currency: 'EUR',
-            monthlyPayment: 0,
-            totalDues: null,
-            duesPaid: 0,
-            paymentDate: '',
-            endDate: '',
-            totalAmount: null,
-            isPaidThisMonth: false,
-        })
+        reset(EMPTY_FORM_DEFAULTS)
 
         setServerSuccess('Deuda guardada correctamente.')
     }
@@ -108,11 +139,17 @@ export function DebtForm() {
         <div className="space-y-6">
             <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                    Añadir nueva financiación o suscripción
+                    {isEdit
+                        ? 'Modificar datos de la financiación o suscripción'
+                        : 'Añadir nueva financiación o suscripción'}
                 </p>
-                <h2 className="text-xl font-semibold">Nueva deuda</h2>
+                <h2 className="text-xl font-semibold">
+                    {isEdit ? 'Editar deuda' : 'Nueva deuda'}
+                </h2>
                 <p className="text-sm text-muted-foreground">
-                    Registra una nueva financiación, cuota o deuda mensual.
+                    {isEdit
+                        ? 'Actualiza los campos y guarda los cambios.'
+                        : 'Registra una nueva financiación, cuota o deuda mensual.'}
                 </p>
             </div>
 
@@ -141,7 +178,7 @@ export function DebtForm() {
                     <div className="grid gap-2">
                         <Label htmlFor="currency">Moneda</Label>
                         <Select
-                            defaultValue="EUR"
+                            value={selectedCurrency}
                             onValueChange={(value: 'EUR' | 'USD') => {
                                 setValue('currency', value, { shouldValidate: true })
                             }}
@@ -305,13 +342,29 @@ export function DebtForm() {
                     <p className="text-sm text-green-600">{serverSuccess}</p>
                 ) : null}
 
-                <Button
-                    type="submit"
-                    className="w-full p-6 cursor-pointer"
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Guardando...' : 'Guardar deuda'}
-                </Button>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    {isEdit ? (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full cursor-pointer sm:w-auto"
+                            asChild
+                        >
+                            <Link href="/">Cancelar</Link>
+                        </Button>
+                    ) : null}
+                    <Button
+                        type="submit"
+                        className="w-full flex-1 cursor-pointer sm:min-w-0"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting
+                            ? 'Guardando...'
+                            : isEdit
+                              ? 'Guardar cambios'
+                              : 'Guardar deuda'}
+                    </Button>
+                </div>
             </form>
         </div>
     )

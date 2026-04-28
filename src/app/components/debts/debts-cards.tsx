@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Debt } from '@/app/types/debt'
@@ -56,8 +57,10 @@ export function DebtsCards({ debts }: DebtsCardsProps) {
                     </div>
 
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                        <Button variant="outline" className="w-full p-6">
-                            Editar
+                        <Button variant="outline" className="w-full p-6" asChild>
+                            <Link href={`/?edit=${debt.id}#new-debt-form`}>
+                                Editar
+                            </Link>
                         </Button>
 
                         <div className="w-full">
