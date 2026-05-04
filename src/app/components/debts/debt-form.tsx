@@ -79,9 +79,7 @@ export function DebtForm({ debtToEdit = null }: DebtFormProps) {
         formState: { errors, isSubmitting },
     } = useForm<DebtFormInput, unknown, DebtFormValues>({
         resolver: zodResolver(debtSchema),
-        defaultValues: debtToEdit
-            ? debtToFormInput(debtToEdit)
-            : EMPTY_FORM_DEFAULTS,
+        defaultValues: debtToEdit ? debtToFormInput(debtToEdit) : EMPTY_FORM_DEFAULTS,
     })
 
     const [serverError, setServerError] = useState<string | null>(null)
@@ -355,7 +353,7 @@ export function DebtForm({ debtToEdit = null }: DebtFormProps) {
                     ) : null}
                     <Button
                         type="submit"
-                        className="w-full flex-1 cursor-pointer sm:min-w-0"
+                        className="w-full flex-1 cursor-pointer sm:min-w-0 p-6"
                         disabled={isSubmitting}
                     >
                         {isSubmitting

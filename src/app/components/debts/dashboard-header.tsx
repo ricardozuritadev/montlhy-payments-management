@@ -16,7 +16,6 @@ import {
 
 import { Plus, RotateCcw } from 'lucide-react'
 import { resetPaidThisMonthAction } from '@/app/actions/reset-paid-this-month-action'
-
 export function DashboardHeader() {
     const [error, setError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
