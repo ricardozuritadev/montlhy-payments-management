@@ -30,7 +30,7 @@ export function DebtsDashboard({ debts, debtToEdit }: DebtsDashboardProps) {
             />
 
             <section className="space-y-6">
-                <div className="rounded-2xl border bg-card shadow-sm">
+                <div className="min-w-0 rounded-2xl border bg-card shadow-sm">
                     <div className="border-b p-4 md:p-6">
                         <h2 className="text-lg font-semibold">Tus deudas</h2>
                         <p className="text-sm text-muted-foreground">
@@ -39,7 +39,7 @@ export function DebtsDashboard({ debts, debtToEdit }: DebtsDashboardProps) {
                         </p>
                     </div>
 
-                    <div className="p-4 md:hidden">
+                    <div className="min-w-0 p-4 md:hidden">
                         <DebtsCards debts={debts} />
                     </div>
 
