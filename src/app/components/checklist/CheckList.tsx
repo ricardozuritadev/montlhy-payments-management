@@ -4,6 +4,7 @@ import { type FormEvent, useOptimistic, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { createChecklistItemAction } from '@/app/actions/create-checklist-item-action'
+import { deleteChecklistItemAction } from '@/app/actions/delete-checklist-item-action'
 import { updateChecklistItemCompletedAction } from '@/app/actions/update-checklist-item-completed-action'
 import type { ChecklistItem } from '@/app/types/checklist'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { X } from 'lucide-react'
 
 type CheckListProps = {
     items: ChecklistItem[]
@@ -75,46 +77,80 @@ function ChecklistAddForm() {
 function ChecklistItemRow({ item }: { item: ChecklistItem }) {
     const router = useRouter()
     const [error, setError] = useState<string | null>(null)
+    const [deleteError, setDeleteError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
+    const [isDeletePending, startDeleteTransition] = useTransition()
     const [checked, setOptimisticChecked] = useOptimistic(
         item.isCompleted,
         (_prev, next: boolean) => next,
     )
 
-    return (
-        <FieldLabel>
-            <Field orientation="horizontal">
-                <Checkbox
-                    id={`checklist-item-${item.id}`}
-                    name={`checklist-item-${item.id}`}
-                    checked={checked}
-                    disabled={isPending}
-                    onCheckedChange={(value) => {
-                        if (value === 'indeterminate') return
-                        const next = value === true
-                        setError(null)
+    const busy = isPending || isDeletePending
 
-                        startTransition(async () => {
-                            setOptimisticChecked(next)
-                            const result = await updateChecklistItemCompletedAction(
-                                item.id,
-                                next,
-                            )
-                            if (!result.success) {
-                                setError(result.error)
+    return (
+        <div className="flex w-full items-start gap-1">
+            <FieldLabel className="min-w-0 flex-1">
+                <Field orientation="horizontal">
+                    <Checkbox
+                        id={`checklist-item-${item.id}`}
+                        name={`checklist-item-${item.id}`}
+                        checked={checked}
+                        disabled={busy}
+                        onCheckedChange={(value) => {
+                            if (value === 'indeterminate') return
+                            const next = value === true
+                            setError(null)
+                            setDeleteError(null)
+
+                            startTransition(async () => {
+                                setOptimisticChecked(next)
+                                const result = await updateChecklistItemCompletedAction(
+                                    item.id,
+                                    next,
+                                )
+                                if (!result.success) {
+                                    setError(result.error)
+                                    router.refresh()
+                                    return
+                                }
                                 router.refresh()
-                                return
-                            }
-                            router.refresh()
-                        })
-                    }}
-                />
-                <FieldContent>
-                    <FieldTitle>{item.title}</FieldTitle>
-                    {error ? <p className="text-destructive text-xs">{error}</p> : null}
-                </FieldContent>
-            </Field>
-        </FieldLabel>
+                            })
+                        }}
+                    />
+                    <FieldContent>
+                        <FieldTitle>{item.title}</FieldTitle>
+                        {error ? (
+                            <p className="text-destructive text-xs">{error}</p>
+                        ) : null}
+                        {deleteError ? (
+                            <p className="text-destructive text-xs">{deleteError}</p>
+                        ) : null}
+                    </FieldContent>
+                </Field>
+            </FieldLabel>
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-11 touch-manipulation text-muted-foreground hover:text-destructive sm:size-8"
+                aria-label={`Eliminar «${item.title}»`}
+                disabled={busy}
+                onClick={() => {
+                    setError(null)
+                    setDeleteError(null)
+                    startDeleteTransition(async () => {
+                        const result = await deleteChecklistItemAction(item.id)
+                        if (!result.success) {
+                            setDeleteError(result.error)
+                            return
+                        }
+                        router.refresh()
+                    })
+                }}
+            >
+                <X className="size-4" aria-hidden />
+            </Button>
+        </div>
     )
 }
 
