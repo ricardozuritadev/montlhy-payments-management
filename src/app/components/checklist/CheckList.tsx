@@ -1,40 +1,44 @@
 'use client'
 
+import type { ChecklistItem } from '@/app/types/checklist'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
     Field,
     FieldContent,
-    FieldDescription,
     FieldGroup,
     FieldLabel,
     FieldTitle,
 } from '@/components/ui/field'
 
-export function CheckList() {
+type CheckListProps = {
+    items: ChecklistItem[]
+}
+
+export function CheckList({ items }: CheckListProps) {
+    if (items.length === 0) {
+        return (
+            <p className="text-muted-foreground text-sm">
+                No hay tareas en el checklist.
+            </p>
+        )
+    }
+
     return (
         <FieldGroup className="max-w-sm">
-            <FieldLabel>
-                <Field orientation="horizontal">
-                    <Checkbox id="toggle-checkbox-2" name="toggle-checkbox-2" />
-                    <FieldContent>
-                        <FieldTitle>Pasar 600€ a Fausto</FieldTitle>
-                        <FieldDescription>
-                            You can enable or disable notifications at any time.
-                        </FieldDescription>
-                    </FieldContent>
-                </Field>
-            </FieldLabel>
-            <FieldLabel>
-                <Field orientation="horizontal">
-                    <Checkbox id="toggle-checkbox-2" name="toggle-checkbox-2" />
-                    <FieldContent>
-                        <FieldTitle>Pasar 530€ a Openbank cuotas</FieldTitle>
-                        <FieldDescription>
-                            You can enable or disable notifications at any time.
-                        </FieldDescription>
-                    </FieldContent>
-                </Field>
-            </FieldLabel>
+            {items.map((item) => (
+                <FieldLabel key={item.id}>
+                    <Field orientation="horizontal">
+                        <Checkbox
+                            id={`checklist-item-${item.id}`}
+                            name={`checklist-item-${item.id}`}
+                            defaultChecked={item.isCompleted}
+                        />
+                        <FieldContent>
+                            <FieldTitle>{item.title}</FieldTitle>
+                        </FieldContent>
+                    </Field>
+                </FieldLabel>
+            ))}
         </FieldGroup>
     )
 }
